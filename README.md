@@ -5,6 +5,13 @@ Author: Maria Stoelben
 The data used consists of two public Kaggle datasets. These include [daily](https://www.kaggle.com/datasets/threnjen/40-years-of-air-quality-index-from-the-epa-daily) / [yearly](https://www.kaggle.com/datasets/threnjen/40-years-of-air-quality-index-from-the-epa-yearly) reports of the air quality index from various US Metro areas, as well as geographic data for the collection locations.  
 
 ## Requirements
+Create a virtual environment:
+
+```setup
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
 To install requirements:
 
 ```setup
