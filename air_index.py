@@ -21,6 +21,12 @@ st.subheader('Locations of Measuring Stations')
 filtered_data = data_year[data_year['Year'] == max(data_year['Year'])]
 st.map(filtered_data)
 
+# development of the daily air quality per state
+st.subheader('Yearly Air Quality per State')
+option_timeseries = st.selectbox('Which state do you want to inspect?', np.unique(data_year['State']))
+data_state = data_year[data_year['State'] == option_timeseries].reset_index()
+st.line_chart(data_state, x='Year', y='Median AQI', color='County')
+
 # option to show and inspect raw data (for the daily only the first 10k rows are displayed)
 st.subheader('Raw Data')
 option = st.selectbox('Which dataset do you want to inspect?', ('None', 'Daily', 'Yearly'))
