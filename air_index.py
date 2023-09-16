@@ -20,37 +20,53 @@ st.set_page_config(layout="wide")
 st.title("EPA Air Quality Index")
 data_year, data_day = load_data()
 
-# Using "with" notation
 with st.sidebar:
     st.subheader("Filter Options")
     option_state = st.selectbox("State:", np.unique(data_year["State"]))
 
     option_time = st.slider(
-        "Year:", min(data_year["Year"]), max(data_year["Year"]), max(data_year["Year"])
+        "Year:", min(data_year["Year"]), max(data_year["Year"]), 2020
     )
 
-data_state = data_year[data_year["State"] == option_state].reset_index()
-filtered_data = data_state[data_state["Year"] == max(data_state["Year"])].reset_index()
+data_state = data_year[data_year["State"] == option_state].reset_index(drop=True)
+date_time = data_state[data_state["Year"] == option_time].reset_index(drop=True)
+date_prev = data_state[data_state["Year"] == (option_time - 1)].reset_index(drop=True)
 
+# KPIs
+st.subheader(f"KPIs for {option_state}")
 col1, col2, col3 = st.columns(3)
-col1.metric("Median AQI", int(filtered_data["Median AQI"].mean()), "1.2 °F")
-col2.metric("# Good Days", int(filtered_data["Good Days"].mean()), "-8%")
-col3.metric("# Unhealthy Days", int(filtered_data["Unhealthy Days"].mean()), "4%")
-
-# map of measuring locations for the air quality index
-st.subheader("Locations of Measuring Stations")
-st.map(data_state)
+col1.metric(
+    "Median AQI",
+    int(date_time["Median AQI"].mean()),
+    int(date_time["Median AQI"].mean() - date_prev["Median AQI"].mean()),
+)
+col2.metric(
+    "\# Good Days",
+    int(date_time["Good Days"].mean()),
+    int(date_time["Good Days"].mean() - date_prev["Good Days"].mean()),
+)
+col3.metric(
+    "\# Unhealthy Days",
+    int(date_time["Unhealthy Days"].mean()),
+    int(date_time["Unhealthy Days"].mean() - date_prev["Unhealthy Days"].mean()),
+)
 
 # development of the daily air quality per state
-st.subheader("Yearly Air Quality per State")
+st.subheader(f"Median AQI per County in {option_state}")
 st.line_chart(data_state, x="Year", y="Median AQI", color="County")
 
+# map of measuring locations for the air quality index
+# TODO: fix map refresh issue - streamlit bug, look into pydeck
+st.subheader(f"Locations of Measuring Stations in {option_state}")
+st.map(date_time)
+
 # option to show and inspect raw data (for the daily only the first 10k rows are displayed)
-st.subheader("Raw Data")
+st.subheader("Raw Data for all States")
 option = st.selectbox(
-    "Which dataset do you want to inspect?", ("None", "Daily", "Yearly")
+    "Select periodicity of the data:", ("None", "Daily", "Yearly")
 )
 if option == "Daily":
-    st.dataframe(data_day.iloc[:10000, :])
+    st.write("This prompt is limited to 50k rows to ensure the speed of the application.")
+    st.dataframe(data_day.iloc[:50000, :])
 if option == "Yearly":
     st.dataframe(data_year)
