@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import datetime
 
 DATE_COLUMN = "date/time"
 DATA_DAILY = "data/aqi_daily_1980_to_2021.csv"
@@ -16,15 +17,19 @@ def load_data():
 
 
 st.set_page_config(layout="wide")
-st.title("Air Quality Index (1980-2021)")
+st.title("EPA Air Quality Index")
 data_year, data_day = load_data()
 
-option_timeseries = st.selectbox(
-    "", np.unique(data_year["State"]), label_visibility="collapsed"
-)
+# Using "with" notation
+with st.sidebar:
+    st.subheader("Filter Options")
+    option_state = st.selectbox("State:", np.unique(data_year["State"]))
 
+    option_time = st.slider(
+        "Year:", min(data_year["Year"]), max(data_year["Year"]), max(data_year["Year"])
+    )
 
-data_state = data_year[data_year["State"] == option_timeseries].reset_index()
+data_state = data_year[data_year["State"] == option_state].reset_index()
 filtered_data = data_state[data_state["Year"] == max(data_state["Year"])].reset_index()
 
 col1, col2, col3 = st.columns(3)
