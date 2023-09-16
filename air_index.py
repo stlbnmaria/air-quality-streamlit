@@ -15,20 +15,29 @@ def load_data():
     return data_year, data_day
 
 
+st.set_page_config(layout="wide")
 st.title("Air Quality Index (1980-2021)")
 data_year, data_day = load_data()
 
+option_timeseries = st.selectbox(
+    "", np.unique(data_year["State"]), label_visibility="collapsed"
+)
+
+
+data_state = data_year[data_year["State"] == option_timeseries].reset_index()
+filtered_data = data_state[data_state["Year"] == max(data_state["Year"])].reset_index()
+
+col1, col2, col3 = st.columns(3)
+col1.metric("Median AQI", int(filtered_data["Median AQI"].mean()), "1.2 °F")
+col2.metric("# Good Days", int(filtered_data["Good Days"].mean()), "-8%")
+col3.metric("# Unhealthy Days", int(filtered_data["Unhealthy Days"].mean()), "4%")
+
 # map of measuring locations for the air quality index
 st.subheader("Locations of Measuring Stations")
-filtered_data = data_year[data_year["Year"] == max(data_year["Year"])]
-st.map(filtered_data)
+st.map(data_state)
 
 # development of the daily air quality per state
 st.subheader("Yearly Air Quality per State")
-option_timeseries = st.selectbox(
-    "Which state do you want to inspect?", np.unique(data_year["State"])
-)
-data_state = data_year[data_year["State"] == option_timeseries].reset_index()
 st.line_chart(data_state, x="Year", y="Median AQI", color="County")
 
 # option to show and inspect raw data (for the daily only the first 10k rows are displayed)
