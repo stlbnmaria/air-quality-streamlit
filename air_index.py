@@ -75,26 +75,28 @@ col3.metric(
 col01, col11 = st.columns(2)
 # map of measuring locations for the air quality index
 col01.subheader(f"Locations of Measuring Stations in {option_time}")
-zoom, center_lat, center_lon = _get_viewport_details(date_time, 'lat', 'lon')
-col01.pydeck_chart(pdk.Deck(
-    map_style=None,
-    initial_view_state=pdk.ViewState(
-        latitude=center_lat,
-        longitude=center_lon,
-        zoom=zoom,
-    ),
-    layers=[
-        pdk.Layer(
-            'ScatterplotLayer',
-            data=date_time,
-            opacity=0.6,
-            radius_min_pixels=3,
-            get_position='[lon, lat]',
-            get_color='[165, 42, 42]',
-            get_radius=200,
+zoom, center_lat, center_lon = _get_viewport_details(date_time, "lat", "lon")
+col01.pydeck_chart(
+    pdk.Deck(
+        map_style=None,
+        initial_view_state=pdk.ViewState(
+            latitude=center_lat,
+            longitude=center_lon,
+            zoom=zoom,
         ),
-    ],
-))
+        layers=[
+            pdk.Layer(
+                "ScatterplotLayer",
+                data=date_time,
+                opacity=0.6,
+                radius_min_pixels=3,
+                get_position="[lon, lat]",
+                get_color="[165, 42, 42]",
+                get_radius=200,
+            ),
+        ],
+    )
+)
 
 col11.subheader(f"Distribution of Rating of Days in {option_time}")
 data_bar = round(date_time.loc[:, "Good Days":"Hazardous Days"].mean(), 0).astype(int)
@@ -143,11 +145,13 @@ fig.update_layout(
 col11.plotly_chart(fig, use_container_width=True)
 
 # development of the daily air quality per state
-# TODO: change ticks in x-axis
 st.subheader(
     f"Median AQI per County ({min(data_year['Year'])} - {max(data_year['Year'])})"
 )
-st.line_chart(data_state, x="Year", y="Median AQI", color="County")
+data_line = data_state.copy()
+data_line["Year"] = data_line.Year.astype(str)
+data_line = data_line.sort_values(by="Year")
+st.line_chart(data_line, x="Year", y="Median AQI", color="County")
 
 # option to show and inspect raw data (for the daily only the first 10k rows are displayed)
 st.subheader(
@@ -160,4 +164,6 @@ if option == "Daily":
     )
     st.dataframe(data_day.iloc[:50000, :])
 if option == "Yearly":
-    st.dataframe(data_year)
+    df_year = data_year.copy()
+    df_year["Year"] = df_year.Year.astype(str)
+    st.dataframe(df_year)
