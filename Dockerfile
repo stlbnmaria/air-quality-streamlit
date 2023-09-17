@@ -15,6 +15,8 @@ RUN git clone https://github.com/stlbnmaria/air-quality-streamlit .
 
 RUN pip3 install -r requirements.txt
 
+COPY data/ data/
+
 EXPOSE 8501
 
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
