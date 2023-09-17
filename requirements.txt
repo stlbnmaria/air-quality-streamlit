@@ -46,25 +46,43 @@ numpy==1.25.2
     # via
     #   altair
     #   pandas
+    #   patsy
+    #   plotly-express
     #   pyarrow
     #   pydeck
+    #   scipy
+    #   statsmodels
     #   streamlit
 packaging==23.1
     # via
     #   altair
+    #   plotly
+    #   statsmodels
     #   streamlit
 pandas==2.1.0
     # via
     #   altair
+    #   plotly-express
+    #   statsmodels
     #   streamlit
+patsy==0.5.3
+    # via
+    #   plotly-express
+    #   statsmodels
 pillow==9.5.0
     # via streamlit
+plotly==5.17.0
+    # via plotly-express
+plotly-express==0.4.1
+    # via -r requirements.in
 protobuf==4.24.3
     # via streamlit
 pyarrow==13.0.0
     # via streamlit
 pydeck==0.8.0
-    # via streamlit
+    # via
+    #   -r requirements.in
+    #   streamlit
 pygments==2.16.1
     # via rich
 pympler==1.0.1
@@ -89,14 +107,24 @@ rpds-py==0.10.3
     # via
     #   jsonschema
     #   referencing
+scipy==1.11.2
+    # via
+    #   plotly-express
+    #   statsmodels
 six==1.16.0
-    # via python-dateutil
+    # via
+    #   patsy
+    #   python-dateutil
 smmap==5.0.0
     # via gitdb
+statsmodels==0.14.0
+    # via plotly-express
 streamlit==1.26.0
     # via -r requirements.in
 tenacity==8.2.3
-    # via streamlit
+    # via
+    #   plotly
+    #   streamlit
 toml==0.10.2
     # via streamlit
 toolz==0.12.0
