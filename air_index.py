@@ -34,7 +34,12 @@ date_prev = data_state[data_state["Year"] == (option_time - 1)].reset_index(drop
 
 # KPIs
 st.subheader(f"KPIs for {option_state}")
-col1, col2, col3 = st.columns(3)
+col0, col1, col2, col3 = st.columns(4)
+col0.metric(
+    "\# Measuring Stations",
+    date_time["County"].nunique(),
+    date_time["County"].nunique() - date_prev["County"].nunique(),
+)
 col1.metric(
     "Median AQI",
     int(date_time["Median AQI"].mean()),
