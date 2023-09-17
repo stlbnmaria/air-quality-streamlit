@@ -15,9 +15,7 @@ RUN git clone https://github.com/stlbnmaria/air-quality-streamlit .
 
 RUN pip3 install -r requirements.txt
 
-RUN mkdir ./data/ \
-    && curl https://www.kaggle.com/datasets/threnjen/40-years-of-air-quality-index-from-the-epa-yearly/download?datasetVersionNumber=2 --output data/aqi_yearly_1980_to_2021.csv \
-    && curl https://www.kaggle.com/datasets/threnjen/40-years-of-air-quality-index-from-the-epa-daily/download?datasetVersionNumber=3 --output data/aqi_daily_1980_to_2021.csv
+COPY data/ data/
 
 EXPOSE 8501
 
