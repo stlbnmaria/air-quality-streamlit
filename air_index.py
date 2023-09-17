@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
 import plotly.express as px
+import pydeck as pdk
 import streamlit as st
+
+from utils.helper_map import _get_viewport_details
 
 DATE_COLUMN = "date/time"
 DATA_DAILY = "data/aqi_daily_1980_to_2021.csv"
@@ -71,9 +74,27 @@ col3.metric(
 
 col01, col11 = st.columns(2)
 # map of measuring locations for the air quality index
-# TODO: fix map refresh issue - streamlit bug, look into pydeck
 col01.subheader(f"Locations of Measuring Stations in {option_time}")
-col01.map(date_time)
+zoom, center_lat, center_lon = _get_viewport_details(date_time, 'lat', 'lon')
+col01.pydeck_chart(pdk.Deck(
+    map_style=None,
+    initial_view_state=pdk.ViewState(
+        latitude=center_lat,
+        longitude=center_lon,
+        zoom=zoom,
+    ),
+    layers=[
+        pdk.Layer(
+            'ScatterplotLayer',
+            data=date_time,
+            opacity=0.6,
+            radius_min_pixels=3,
+            get_position='[lon, lat]',
+            get_color='[165, 42, 42]',
+            get_radius=200,
+        ),
+    ],
+))
 
 col11.subheader(f"Distribution of Rating of Days in {option_time}")
 data_bar = round(date_time.loc[:, "Good Days":"Hazardous Days"].mean(), 0).astype(int)
