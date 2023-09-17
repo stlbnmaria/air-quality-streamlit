@@ -34,6 +34,7 @@ Build the image:
 ```docker
 docker build -t streamlit .
 ```
+:warning: Consider using the flag `--no-cache` to build the image from scratch (e.g., include latest changes from git).
 
 Run the container:
 ```docker
