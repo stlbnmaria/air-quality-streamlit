@@ -17,7 +17,6 @@ def load_data():
 
 
 st.set_page_config(layout="wide")
-st.title("EPA Air Quality Index")
 data_year, data_day = load_data()
 
 with st.sidebar:
@@ -32,42 +31,51 @@ data_state = data_year[data_year["State"] == option_state].reset_index(drop=True
 date_time = data_state[data_state["Year"] == option_time].reset_index(drop=True)
 date_prev = data_state[data_state["Year"] == (option_time - 1)].reset_index(drop=True)
 
+st.title(f"Air Quality Index in {option_state}")
+
 # KPIs
-# TODO: correct rounding & add Unhealthy+
-st.subheader(f"KPIs for {option_state}")
+st.subheader(f"KPIs for {option_time}")
 col0, col1, col2, col3 = st.columns(4)
 col0.metric(
     "\# Measuring Stations",
     date_time["County"].nunique(),
     date_time["County"].nunique() - date_prev["County"].nunique(),
 )
+med_aqi = int(round(date_time["Median AQI"].mean(), 0))
 col1.metric(
     "Median AQI",
-    int(date_time["Median AQI"].mean()),
-    int(date_time["Median AQI"].mean() - date_prev["Median AQI"].mean()),
+    med_aqi,
+    med_aqi - int(round(date_prev["Median AQI"].mean(), 0)),
 )
+good_days = int(round(date_time["Good Days"].mean(), 0))
 col2.metric(
     "\# Good Days",
-    int(date_time["Good Days"].mean()),
-    int(date_time["Good Days"].mean() - date_prev["Good Days"].mean()),
+    good_days,
+    good_days - int(round(date_prev["Good Days"].mean(), 0)),
+)
+unhealth_days = int(
+    round(date_time["Unhealthy Days"].mean(), 0)
+    + round(date_time["Very Unhealthy Days"].mean(), 0)
+    + round(date_time["Hazardous Days"].mean(), 0)
+)
+unhealth_days_prev = int(
+    round(date_prev["Unhealthy Days"].mean(), 0)
+    + round(date_prev["Very Unhealthy Days"].mean(), 0)
+    + round(date_prev["Hazardous Days"].mean(), 0)
 )
 col3.metric(
-    "\# Unhealthy Days",
-    int(date_time["Unhealthy Days"].mean()),
-    int(date_time["Unhealthy Days"].mean() - date_prev["Unhealthy Days"].mean()),
+    "\# Unhealthy+ Days",
+    unhealth_days,
+    unhealth_days - unhealth_days_prev,
 )
-
-# development of the daily air quality per state
-st.subheader(f"Median AQI per County in {option_state}")
-st.line_chart(data_state, x="Year", y="Median AQI", color="County")
 
 col01, col11 = st.columns(2)
 # map of measuring locations for the air quality index
 # TODO: fix map refresh issue - streamlit bug, look into pydeck
-col01.subheader(f"Locations of Measuring Stations in {option_state}")
+col01.subheader(f"Locations of Measuring Stations in {option_time}")
 col01.map(date_time)
 
-col11.subheader(f"Distribution of Rating of Days in {option_state}")
+col11.subheader(f"Distribution of Rating of Days in {option_time}")
 data_bar = round(date_time.loc[:, "Good Days":"Hazardous Days"].mean(), 0).astype(int)
 data_bar.rename(
     index={
@@ -113,8 +121,17 @@ fig.update_layout(
 )
 col11.plotly_chart(fig, use_container_width=True)
 
+# development of the daily air quality per state
+# TODO: change ticks in x-axis
+st.subheader(
+    f"Median AQI per County ({min(data_year['Year'])} - {max(data_year['Year'])})"
+)
+st.line_chart(data_state, x="Year", y="Median AQI", color="County")
+
 # option to show and inspect raw data (for the daily only the first 10k rows are displayed)
-st.subheader("Raw Data for all States")
+st.subheader(
+    f"Raw Data for all States ({min(data_year['Year'])} - {max(data_year['Year'])})"
+)
 option = st.selectbox("Select periodicity of the data:", ("None", "Daily", "Yearly"))
 if option == "Daily":
     st.write(
