@@ -1,6 +1,8 @@
 # Air Quality Index from the EPA (1980-2021)
 Author: Maria Stoelben
 
+This project uses EPA air quality index data from the US to exemplify how to build a simple Streamlit dashboard and run it locally or build a docker image and run the container.
+
 ## Data
 The data used consists of two public Kaggle datasets. These include [daily](https://www.kaggle.com/datasets/threnjen/40-years-of-air-quality-index-from-the-epa-daily) / [yearly](https://www.kaggle.com/datasets/threnjen/40-years-of-air-quality-index-from-the-epa-yearly) reports of the air quality index from various US Metro areas, as well as geographic data for the collection locations.  
 
