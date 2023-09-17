@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import pydeck as pdk
 import streamlit as st
+from typing import Tuple
 
 from utils.helper_map import _get_viewport_details
 
@@ -12,16 +13,19 @@ DATA_YEARLY = "data/aqi_yearly_1980_to_2021.csv"
 
 
 @st.cache_data
-def load_data():
+def load_data() -> Tuple[pd.DataFrame]:
+    """Load the two csv files and rename the lat/lon column for the yearly data."""
     data_year = pd.read_csv(DATA_YEARLY)
     data_day = pd.read_csv(DATA_DAILY)
     data_year.rename(columns={"Latitude": "lat", "Longitude": "lon"}, inplace=True)
     return data_year, data_day
 
 
+# setup and loading of data
 st.set_page_config(layout="wide")
 data_year, data_day = load_data()
 
+# create sidebar with dropdown select for state and time
 with st.sidebar:
     st.subheader("Filter Options")
     option_state = st.selectbox("State:", np.unique(data_year["State"]))
@@ -30,32 +34,39 @@ with st.sidebar:
         "Year:", min(data_year["Year"]), max(data_year["Year"]), 2020
     )
 
+# filter data needed for graphs, etc. according to sidebar's dropdowns
 data_state = data_year[data_year["State"] == option_state].reset_index(drop=True)
 date_time = data_state[data_state["Year"] == option_time].reset_index(drop=True)
 date_prev = data_state[data_state["Year"] == (option_time - 1)].reset_index(drop=True)
 
+# header of page
 st.title(f"Air Quality Index in {option_state}")
 
 # KPIs
 st.subheader(f"KPIs for {option_time}")
 col0, col1, col2, col3 = st.columns(4)
+# number of measuring stations for that year - comparison prev year
 col0.metric(
     "\# Measuring Stations",
     date_time["County"].nunique(),
     date_time["County"].nunique() - date_prev["County"].nunique(),
 )
+# median AQI for the Year - comparison prev year
 med_aqi = int(round(date_time["Median AQI"].mean(), 0))
 col1.metric(
     "Median AQI",
     med_aqi,
     med_aqi - int(round(date_prev["Median AQI"].mean(), 0)),
 )
+# number of good days for the Year - comparison prev year
 good_days = int(round(date_time["Good Days"].mean(), 0))
 col2.metric(
     "\# Good Days",
     good_days,
     good_days - int(round(date_prev["Good Days"].mean(), 0)),
 )
+# number of unhealthy+ (unhealthy, very unhealthy, hazardous)
+# days for the Year - comparison prev year
 unhealth_days = int(
     round(date_time["Unhealthy Days"].mean(), 0)
     + round(date_time["Very Unhealthy Days"].mean(), 0)
@@ -98,9 +109,10 @@ col01.pydeck_chart(
     )
 )
 
+# pie chart with number and percentages of rating of days
 col11.subheader(f"Distribution of Rating of Days in {option_time}")
-data_bar = round(date_time.loc[:, "Good Days":"Hazardous Days"].mean(), 0).astype(int)
-data_bar.rename(
+data_pie = round(date_time.loc[:, "Good Days":"Hazardous Days"].mean(), 0).astype(int)
+data_pie.rename(
     index={
         "Good Days": "Good",
         "Moderate Days": "Moderate",
@@ -111,10 +123,11 @@ data_bar.rename(
     },
     inplace=True,
 )
-data_bar = data_bar.reset_index()
-data_bar.columns = ["Rating", "Number of Days"]
-data_bar["Rating"] = pd.Categorical(
-    data_bar.Rating,
+# assign nice column names and sort according to grade of rating
+data_pie = data_pie.reset_index()
+data_pie.columns = ["Rating", "Number of Days"]
+data_pie["Rating"] = pd.Categorical(
+    data_pie.Rating,
     ordered=True,
     categories=[
         "Good",
@@ -125,9 +138,10 @@ data_bar["Rating"] = pd.Categorical(
         "Hazardous",
     ],
 )
-data_bar = data_bar.sort_values("Rating")
+data_pie = data_pie.sort_values("Rating")
+# create pychart with plotly express
 fig = px.pie(
-    data_bar,
+    data_pie,
     values="Number of Days",
     names="Rating",
     hole=0.3,

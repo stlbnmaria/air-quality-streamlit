@@ -1,4 +1,5 @@
 from typing_extensions import Final
+from typing import Tuple
 
 _DEFAULT_ZOOM_LEVEL: Final = 12
 _ZOOM_LEVELS: Final = [
@@ -25,8 +26,10 @@ _ZOOM_LEVELS: Final = [
     0.00025,
 ]
 
+
 def _get_zoom_level(distance: float) -> int:
     """Get the zoom level for a given distance in degrees.
+    Function from https://github.com/streamlit/streamlit/blob/develop/lib/streamlit/elements/map.py#L443
 
     See https://wiki.openstreetmap.org/wiki/Zoom_levels for reference.
 
@@ -49,8 +52,13 @@ def _get_zoom_level(distance: float) -> int:
     return _DEFAULT_ZOOM_LEVEL
 
 
-def _get_viewport_details(data:str, lat_col_name: str, lon_col_name: str, zoom: float = None):
-    """Auto-set viewport when not fully specified by user."""
+def _get_viewport_details(
+    data: str, lat_col_name: str, lon_col_name: str, zoom: float = None
+) -> Tuple[float]:
+    """Auto-set viewport when not fully specified by user.
+
+    Function from https://github.com/streamlit/streamlit/blob/develop/lib/streamlit/elements/map.py#L443
+    """
     min_lat = data[lat_col_name].min()
     max_lat = data[lat_col_name].max()
     min_lon = data[lon_col_name].min()
